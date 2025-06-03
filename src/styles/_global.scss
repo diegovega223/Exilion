@@ -1,0 +1,90 @@
+body {
+  cursor: url('../assets/cursors/normal.cur'), auto !important;
+  background-color: black;
+}
+
+button,
+button:hover {
+  cursor: url('../assets/cursors/pointer.cur'), pointer !important;
+}
+
+.help-icon,
+.help-icon:hover {
+  cursor: url('../assets/cursors/help.cur'), help !important;
+}
+
+select,
+select option,
+input[type="number"],
+input[type="text"] {
+  cursor: url('../assets/cursors/normal.cur'), auto !important;
+}
+
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('../assets/fonts/PressStart2P-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body,
+html,
+div,
+section,
+main,
+header,
+footer {
+  font-family: 'Press Start 2P', cursive, monospace !important;
+  -webkit-font-smoothing: none !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: geometricPrecision !important;
+  image-rendering: pixelated !important;
+  user-select: none !important;
+}
+
+p,
+span,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+label {
+  line-height: 1 !important;
+  vertical-align: middle;
+ // display: inline-block;
+}
+
+button {
+  font-family: 'Press Start 2P', cursive, monospace !important;
+  line-height: 1 !important;
+  display: inline-flex;
+  align-items: center;
+  user-select: none !important;
+  padding: 0.25em 0.5em;
+  height: 2.5em;
+  box-sizing: border-box;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+@keyframes bounce {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
