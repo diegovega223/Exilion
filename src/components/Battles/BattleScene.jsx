@@ -16,6 +16,8 @@ const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, i
   const [turnIndex, setTurnIndex] = useState(0);
   const [message, setMessage] = useState('');
   const [isDefending, setIsDefending] = useState(false);
+  const [selectedEnemyIndex, setSelectedEnemyIndex] = useState(null);
+  const [isSelectingEnemy, setIsSelectingEnemy] = useState(false);
 
   const { player, playerHp, setPlayerHp } = usePlayer();
   const { enemyList, setEnemyList } = useEnemies(enemies);
@@ -36,20 +38,39 @@ const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, i
     setTurnIndex(prev => nextTurnIndex(prev, totalCombatants));
   }, [totalCombatants]);
 
-  const handlePlayerAttack = useCallback(() => {
-    const { updatedEnemies } = playerAttack(player, enemyList, calculateDamage, showMessage);
+  // Cuando el usuario hace clic en "Atacar", habilita la selección de enemigo
+  const handleAttackButton = useCallback(() => {
+    setIsSelectingEnemy(true);
+    showMessage('Selecciona un enemigo para atacar.');
+  }, [showMessage]);
+
+  // Cuando el usuario selecciona un enemigo, realiza el ataque
+  const handleEnemyClick = useCallback((index) => {
+    if (!isSelectingEnemy || getCombatantType(turnIndex) !== 'player') return;
+    if (!enemyList[index]) return;
+    const { updatedEnemies } = playerAttack(
+      player,
+      enemyList,
+      calculateDamage,
+      showMessage,
+      index
+    );
     setEnemyList(updatedEnemies);
+    setSelectedEnemyIndex(null);
+    setIsSelectingEnemy(false);
     const result = checkBattleEnd(playerHp, updatedEnemies);
     if (result === 'victory') {
       showMessage('¡Has ganado la batalla!', 2500);
       return;
     }
     nextTurn();
-  }, [enemyList, nextTurn, player, playerHp, showMessage, setEnemyList]);
+  }, [isSelectingEnemy, enemyList, player, playerHp, showMessage, setEnemyList, turnIndex, nextTurn]);
 
   const handlePlayerDefend = useCallback(() => {
     showMessage(`${player.name} se defiende. Daño reducido en el próximo ataque.`);
     setIsDefending(true);
+    setIsSelectingEnemy(false);
+    setSelectedEnemyIndex(null);
     nextTurn();
   }, [nextTurn, player.name, showMessage]);
 
@@ -69,6 +90,8 @@ const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, i
       return newHp;
     });
     setIsDefending(false);
+    setIsSelectingEnemy(false);
+    setSelectedEnemyIndex(null);
     const timer = setTimeout(nextTurn, 3000);
     return () => clearTimeout(timer);
   }, [turnIndex, enemyList, isDefending, nextTurn, player.stats, showMessage, setPlayerHp]);
@@ -80,7 +103,16 @@ const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, i
           <div className="battleback-layer back1" style={{ backgroundImage: `url(${battleback1})` }} />
           <div className="battleback-layer back2" style={{ backgroundImage: `url(${battleback2})` }} />
           <div className="battle-entities">
-            <EnemyList enemyList={enemyList} playClick={playClick} />
+            <EnemyList
+              enemyList={enemyList}
+              playClick={playClick}
+              selectedEnemyIndex={selectedEnemyIndex}
+              onSelectEnemy={isSelectingEnemy ? (index) => {
+                setSelectedEnemyIndex(index);
+                handleEnemyClick(index);
+              } : undefined}
+              isSelectingEnemy={isSelectingEnemy}
+            />
           </div>
         </div>
       </div>
@@ -90,12 +122,13 @@ const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, i
       <BattleMenu
         menuState={menuState}
         handleClick={handleClick}
-        handlePlayerAttack={handlePlayerAttack}
+        handlePlayerAttack={handleAttackButton}
         handlePlayerDefend={handlePlayerDefend}
         setMenuState={setMenuState}
         showMessage={showMessage}
         turnIndex={turnIndex}
         getCombatantType={getCombatantType}
+        isSelectingEnemy={isSelectingEnemy}
       />
       <div className="turn-indicator bottom-left">
         Turno de: <strong>{getCombatantType(turnIndex) === 'player' ? player.name : enemyList[turnIndex - 1]?.name || '...'}</strong>

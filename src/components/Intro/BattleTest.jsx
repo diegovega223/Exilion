@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { startBattle } from '../../utils/startBattle';
 
 const BattleTest = () => {
