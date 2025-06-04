@@ -5,76 +5,76 @@ import { razasDisponibles, clavesMental, clavesFisico } from '../../data/charact
 export default function StatsMenu() {
   const { state } = useGame();
 
-  const razaObj = razasDisponibles.find(
-    r => r.nombre.toLowerCase() === (state.raza || '').toLowerCase()
+  const raceObj = razasDisponibles.find(
+    r => r.nombre.toLowerCase() === (state.race || '').toLowerCase()
   );
 
-  const getMentalDetail = (clave) => clavesMental.find(c => c.clave === clave);
-  const getFisicoDetail = (clave) => clavesFisico.find(c => c.clave === clave);
+  const getMentalDetail = (key) => clavesMental.find(c => c.clave === key);
+  const getPhysicalDetail = (key) => clavesFisico.find(c => c.clave === key);
 
   return (
     <div className="stats-menu-container">
       <div className="menu-test stats-menu-panel visible">
-        <h3 className="menu-test__title">📜 Stats del Jugador</h3>
+        <h3 className="menu-test__title">📜 Player Stats</h3>
 
         <div className="menu-test__section">
           <div className="menu-test__label">
-            <strong>Nombre:</strong> {state.nombre || 'No asignado'}
+            <strong>Name:</strong> {state.name || 'Not assigned'}
           </div>
           <div className="menu-test__label">
-            <strong>Edad:</strong> {state.edad || 'No asignada'}
+            <strong>Age:</strong> {state.age || 'Not assigned'}
           </div>
           <div
-            className={`menu-test__label help-icon${razaObj ? '' : ' no-help'}`}
-            title={razaObj ? razaObj.descripcion : ''}
+            className={`menu-test__label help-icon${raceObj ? '' : ' no-help'}`}
+            title={raceObj ? raceObj.descripcion : ''}
           >
-            <strong>Raza:</strong>{' '}
-            {razaObj ? `${razaObj.emoji} ${razaObj.nombre}` : (state.raza || 'No asignada')}
+            <strong>Race:</strong>{' '}
+            {raceObj ? `${raceObj.emoji} ${raceObj.nombre}` : (state.race || 'Not assigned')}
           </div>
         </div>
 
         <div className="menu-test__label">
-          <strong>🌟 Reputación:</strong> {state.reputacion}
+          <strong>🌟 Reputation:</strong> {state.reputation ?? 'N/A'}
         </div>
         <div className="menu-test__label">
-          <strong>💰 Oro:</strong> {state.oro ?? 0}
+          <strong>💰 Gold:</strong> {state.gold ?? 0}
         </div>
         <div className="menu-test__label">
-          <strong>⏳ Tiempo de juego:</strong> {formatTiempo(state.tiempoJuego)}
+          <strong>⏳ Playtime:</strong> {formatTime(state.playTime)}
         </div>
 
-        <h4 className="menu-test__label">🤝 Afinidad:</h4>
-        {Object.entries(state.afinidad).length === 0 ? (
-          <div className="menu-test__info">No hay afinidades aún</div>
+        <h4 className="menu-test__label">🤝 Affinity:</h4>
+        {Object.entries(state.affinity).length === 0 ? (
+          <div className="menu-test__info">No affinities yet</div>
         ) : (
           <ul>
-            {Object.entries(state.afinidad).map(([personaje, valor]) => (
-              <li key={personaje}>
-                {personaje}: {valor}
+            {Object.entries(state.affinity).map(([character, value]) => (
+              <li key={character}>
+                {character}: {value}
               </li>
             ))}
           </ul>
         )}
 
-        <h4 className="menu-test__label">🧠 Stats Mentales:</h4>
+        <h4 className="menu-test__label">🧠 Mental Stats:</h4>
         {Object.entries(state.mental).length === 0 ? (
-          <div className="menu-test__info">No hay stats mentales</div>
+          <div className="menu-test__info">No mental stats</div>
         ) : (
           <ul>
-            {Object.entries(state.mental).map(([stat, valor]) => {
-              const detalle = getMentalDetail(stat);
+            {Object.entries(state.mental).map(([stat, value]) => {
+              const detail = getMentalDetail(stat);
               return (
                 <li
                   key={stat}
-                  className={detalle ? 'help-icon' : ''}
-                  title={detalle ? detalle.descripcion : ''}
+                  className={detail ? 'help-icon' : ''}
+                  title={detail ? detail.descripcion : ''}
                 >
-                  {detalle ? (
+                  {detail ? (
                     <>
-                      {detalle.icono} <strong>{detalle.clave}</strong>: {valor}
+                      {detail.icono} <strong>{detail.clave}</strong>: {value}
                     </>
                   ) : (
-                    `${stat}: ${valor}`
+                    `${stat}: ${value}`
                   )}
                 </li>
               );
@@ -82,25 +82,25 @@ export default function StatsMenu() {
           </ul>
         )}
 
-        <h4 className="menu-test__label">💪 Stats Físicos:</h4>
-        {Object.entries(state.fisico).length === 0 ? (
-          <div className="menu-test__info">No hay stats físicos</div>
+        <h4 className="menu-test__label">💪 Physical Stats:</h4>
+        {Object.entries(state.physical).length === 0 ? (
+          <div className="menu-test__info">No physical stats</div>
         ) : (
           <ul>
-            {Object.entries(state.fisico).map(([stat, valor]) => {
-              const detalle = getFisicoDetail(stat);
+            {Object.entries(state.physical).map(([stat, value]) => {
+              const detail = getPhysicalDetail(stat);
               return (
                 <li
                   key={stat}
-                  className={detalle ? 'help-icon' : ''}
-                  title={detalle ? detalle.descripcion : ''}
+                  className={detail ? 'help-icon' : ''}
+                  title={detail ? detail.descripcion : ''}
                 >
-                  {detalle ? (
+                  {detail ? (
                     <>
-                      {detalle.icono} <strong>{detalle.clave}</strong>: {valor}
+                      {detail.icono} <strong>{detail.clave}</strong>: {value}
                     </>
                   ) : (
-                    `${stat}: ${valor}`
+                    `${stat}: ${value}`
                   )}
                 </li>
               );
@@ -112,9 +112,8 @@ export default function StatsMenu() {
   );
 }
 
-// Formato para mostrar tiempo de juego como "1h 23m"
-function formatTiempo(mins) {
-  const h = Math.floor((mins || 0) / 60);
-  const m = (mins || 0) % 60;
+function formatTime(minutes) {
+  const h = Math.floor((minutes || 0) / 60);
+  const m = (minutes || 0) % 60;
   return `${h}h ${m}m`;
 }

@@ -5,112 +5,129 @@ import { razasDisponibles, clavesMental, clavesFisico } from '../../data/charact
 export default function StatEditor() {
   const { state, dispatch } = useGame();
 
-  const [tipo, setTipo] = useState('identidad');
-  const [clave, setClave] = useState('');
-  const [valor, setValor] = useState(0);
+  const [type, setType] = useState('identity');
+  const [key, setKey] = useState('');
+  const [value, setValue] = useState(0);
 
-  const [nombre, setNombre] = useState('');
-  const [edad, setEdad] = useState('');
-  const [raza, setRaza] = useState('');
+  const [name, setName] = useState('');
+  const [age, setAge] = useState('');
+  const [race, setRace] = useState('');
 
   useEffect(() => {
-    if (state.personaje) {
-      const { nombre, edad, raza } = state.personaje;
-      setNombre(nombre || '');
-      setEdad(edad?.toString() || '');
-      setRaza(raza || '');
+    if (state.character) {
+      const { name, age, race } = state.character;
+      setName(name || '');
+      setAge(age?.toString() || '');
+      setRace(race || '');
     }
-  }, [state.personaje]);
+  }, [state.character]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (['afinidad', 'mental', 'fisico'].includes(tipo) && !clave) {
-      return alert('La clave es requerida');
+    if (['affinity', 'mental', 'physical'].includes(type) && !key) {
+      return alert('Key is required');
     }
 
-    const numValor = Number(valor);
-    if (['afinidad', 'mental', 'fisico', 'reputacion'].includes(tipo)) {
-      if (isNaN(numValor)) return alert('El valor debe ser un número');
+    const numValue = Number(value);
+    if (['affinity', 'mental', 'physical', 'reputation'].includes(type)) {
+      if (isNaN(numValue)) return alert('Value must be a number');
 
-      switch (tipo) {
-        case 'afinidad':
-          dispatch({ type: 'SET_AFINIDAD', personaje: clave, valor: numValor });
+      switch (type) {
+        case 'affinity':
+          dispatch({ type: 'SET_AFFINITY', character: key, value: numValue });
           break;
-        case 'reputacion':
-          dispatch({ type: 'UPDATE_REPUTACION', valor: numValor });
+        case 'reputation':
+          dispatch({ type: 'UPDATE_REPUTATION', value: numValue });
           break;
         case 'mental':
-          dispatch({ type: 'SET_STAT_MENTAL', stat: clave, valor: numValor });
+          dispatch({ type: 'SET_STAT_MENTAL', stat: key, value: numValue });
           break;
-        case 'fisico':
-          dispatch({ type: 'SET_STAT_FISICO', stat: clave, valor: numValor });
+        case 'physical':
+          dispatch({ type: 'SET_STAT_PHYSICAL', stat: key, value: numValue });
           break;
         default:
           break;
       }
 
-      setClave('');
-      setValor(0);
+      setKey('');
+      setValue(0);
     }
 
-    if (tipo === 'identidad') {
-      if (!nombre.trim()) return alert('El nombre no puede estar vacío');
-      if (!raza || !razasDisponibles.some(r => r.nombre === raza)) return alert('Seleccioná una raza válida');
-      const numEdad = parseInt(edad);
-      if (isNaN(numEdad) || numEdad <= 0) return alert('Edad inválida');
+    if (type === 'identity') {
+      if (!name.trim()) return alert('Name cannot be empty');
+      if (!race || !razasDisponibles.some(r => r.nombre === race)) return alert('Select a valid race');
+      const numAge = parseInt(age);
+      if (isNaN(numAge) || numAge <= 0) return alert('Invalid age');
 
-      dispatch({ type: 'SET_NOMBRE', valor: nombre });
-      dispatch({ type: 'SET_EDAD', valor: numEdad });
-      dispatch({ type: 'SET_RAZA', valor: raza });
+      dispatch({ type: 'SET_NAME', value: name });
+      dispatch({ type: 'SET_AGE', value: numAge });
+      dispatch({ type: 'SET_RACE', value: race });
 
-      alert('Identidad actualizada');
+      alert('Identity updated');
     }
   };
 
   const handleDelete = () => {
-    if (tipo !== 'afinidad') {
-      alert(`No se puede borrar ${tipo} directamente`);
+    if (type !== 'affinity') {
+      alert(`You can only delete affinity stats directly`);
       return;
     }
 
-    if (!clave) return alert('Clave requerida para borrar');
+    if (!key) return alert('Key required to delete');
 
-    dispatch({ type: 'DELETE_AFINIDAD', personaje: clave });
+    dispatch({ type: 'DELETE_AFFINITY', character: key });
 
-    setClave('');
-    setValor(0);
+    setKey('');
+    setValue(0);
   };
 
   return (
     <form className="menu-test" onSubmit={handleSubmit}>
       <label className="menu-test__label">
-        Tipo de Stat:
-        <select className="menu-test__select" value={tipo} onChange={(e) => setTipo(e.target.value)}>
-          <option value="identidad">🧑 Identidad</option>
-          <option value="afinidad">🤝 Afinidad</option>
-          <option value="reputacion">⭐ Reputación</option>
+        Stat Type:
+        <select className="menu-test__select" value={type} onChange={(e) => setType(e.target.value)}>
+          <option value="identity">🧑 Identity</option>
+          <option value="affinity">🤝 Affinity</option>
+          <option value="reputation">⭐ Reputation</option>
           <option value="mental">🧠 Mental</option>
-          <option value="fisico">💪 Físico</option>
+          <option value="physical">💪 Physical</option>
         </select>
       </label>
 
-      {tipo === 'identidad' && (
+      {type === 'identity' && (
         <>
           <label className="menu-test__label">
-            Nombre:
-            <input className="menu-test__input menu-test__input--wide" type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
+            Name:
+            <input
+              className="menu-test__input menu-test__input--wide"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
           </label>
 
           <label className="menu-test__label">
-            Edad:
-            <input className="menu-test__input menu-test__input--small" type="number" value={edad} onChange={(e) => setEdad(e.target.value)} required />
+            Age:
+            <input
+              className="menu-test__input menu-test__input--small"
+              type="number"
+              value={age}
+              onChange={(e) => setAge(e.target.value)}
+              required
+            />
           </label>
 
           <label className="menu-test__label">
-            Raza:
-            <select className="menu-test__select" value={raza} onChange={(e) => setRaza(e.target.value)} required>
-              <option value="">Seleccionar</option>
+            Race:
+            <select
+              className="menu-test__select"
+              value={race}
+              onChange={(e) => setRace(e.target.value)}
+              required
+            >
+              <option value="">Select</option>
               {razasDisponibles.map((r) => (
                 <option key={r.nombre} value={r.nombre}>
                   {r.emoji} {r.nombre}
@@ -121,12 +138,17 @@ export default function StatEditor() {
         </>
       )}
 
-      {['mental', 'fisico'].includes(tipo) && (
+      {['mental', 'physical'].includes(type) && (
         <label className="menu-test__label">
-          Clave:
-          <select className="menu-test__select help-icon" value={clave} onChange={(e) => setClave(e.target.value)} required>
-            <option value="">Seleccionar</option>
-            {(tipo === 'mental' ? clavesMental : clavesFisico).map(({ clave, icono, nombre }) => (
+          Key:
+          <select
+            className="menu-test__select help-icon"
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
+            required
+          >
+            <option value="">Select</option>
+            {(type === 'mental' ? clavesMental : clavesFisico).map(({ clave, icono, nombre }) => (
               <option key={clave} value={clave}>
                 {icono} {nombre}
               </option>
@@ -135,28 +157,46 @@ export default function StatEditor() {
         </label>
       )}
 
-      {tipo === 'afinidad' && (
+      {type === 'affinity' && (
         <label className="menu-test__label">
-          Clave:
-          <input className="menu-test__input menu-test__input--wide" type="text" value={clave} onChange={(e) => setClave(e.target.value)} required />
+          Key:
+          <input
+            className="menu-test__input menu-test__input--wide"
+            type="text"
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
+            required
+          />
         </label>
       )}
 
-      {tipo === 'reputacion' && (
-        <div className="menu-test__info">Clave no necesaria para reputación</div>
-      )}
+      {type === 'reputation' && <div className="menu-test__info">No key needed for reputation</div>}
 
-      {['afinidad', 'mental', 'fisico', 'reputacion'].includes(tipo) && (
+      {['affinity', 'mental', 'physical', 'reputation'].includes(type) && (
         <label className="menu-test__label">
-          Valor:
-          <input className="menu-test__input menu-test__input--small" type="number" value={valor} onChange={(e) => setValor(e.target.value)} required />
+          Value:
+          <input
+            className="menu-test__input menu-test__input--small"
+            type="number"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            required
+          />
         </label>
       )}
 
       <div className="menu-test__buttons">
-        <button type="submit" className="menu-test__button">🛠️ Actualizar</button>
-        {tipo === 'afinidad' && (
-          <button type="button" onClick={handleDelete} className="menu-test__button menu-test__button--delete">❌ Borrar</button>
+        <button type="submit" className="menu-test__button">
+          🛠️ Update
+        </button>
+        {type === 'affinity' && (
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="menu-test__button menu-test__button--delete"
+          >
+            ❌ Delete
+          </button>
         )}
       </div>
     </form>

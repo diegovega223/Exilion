@@ -3,11 +3,11 @@ import { useGame } from '../system/GameProvider';
 import { loadGame, hasSavedGame } from '../system/SaveManager';
 import selectSound from '../../assets/audio/se/select.ogg';
 
-function formatTiempo(segundos) {
-    if (!segundos && segundos !== 0) return 'N/A';
-    const h = Math.floor(segundos / 3600);
-    const m = Math.floor((segundos % 3600) / 60);
-    const s = segundos % 60;
+function formatTime(seconds) {
+    if (!seconds && seconds !== 0) return 'N/A';
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
     return [h, m, s]
         .map(unit => String(unit).padStart(2, '0'))
         .join(':');
@@ -28,13 +28,11 @@ export default function LoadScreen({ onBack }) {
     const handleLoad = () => {
         if (savedData) {
             dispatch({ type: 'LOAD_FULL_STATE', valor: savedData });
-            alert('Partida cargada.');
+            alert('Game loaded.');
         } else {
-            alert('No hay partida guardada.');
+            alert('No saved game found.');
         }
     };
-
-    const handleBack = () => playSelectSound(onBack);
 
     const playSelectSound = (callback) => {
         const audio = selectRef.current;
@@ -48,34 +46,35 @@ export default function LoadScreen({ onBack }) {
         }
     };
 
+    const handleBack = () => playSelectSound(onBack);
+
     return (
         <div className="stats-menu-container">
             <div className="menu-test stats-menu-panel visible">
-                <h2 className="menu-test__title">Cargar Partida</h2>
+                <h2 className="menu-test__title">Load Game</h2>
 
                 {savedData ? (
                     <>
                         <div className="menu-test__section">
-                            <div className="menu-test__label"><strong>Nombre:</strong> {savedData.nombre || 'N/A'}</div>
-                            <div className="menu-test__label"><strong>Edad:</strong> {savedData.edad || 'N/A'}</div>
-                            <div className="menu-test__label"><strong>Raza:</strong> {savedData.raza || 'N/A'}</div>
-                            <div className="menu-test__label"><strong>Reputación:</strong> {savedData.reputacion ?? 'N/A'}</div>
-                            <div className="menu-test__label"><strong>Oro:</strong> {savedData.oro ?? 0}</div>
+                            <div className="menu-test__label"><strong>Name:</strong> {savedData.name || 'N/A'}</div>
+                            <div className="menu-test__label"><strong>Age:</strong> {savedData.age || 'N/A'}</div>
+                            <div className="menu-test__label"><strong>Race:</strong> {savedData.race || 'N/A'}</div>
+                            <div className="menu-test__label"><strong>Reputation:</strong> {savedData.reputation ?? 'N/A'}</div>
+                            <div className="menu-test__label"><strong>Gold:</strong> {savedData.gold ?? 0}</div>
                             <div className="menu-test__label">
-                                <strong>Tiempo de juego:</strong> {formatTiempo(savedData.tiempoJuego)}
+                                <strong>Playtime:</strong> {formatTime(savedData.playTime)}
                             </div>
                         </div>
 
-
                         <div className="button-row">
-                            <button onClick={handleLoad} className="menu-principal__button">💾 Cargar</button>
-                            <button onClick={handleBack} className="menu-principal__button">🔙 Volver</button>
+                            <button onClick={handleLoad} className="menu-principal__button">💾 Load</button>
+                            <button onClick={handleBack} className="menu-principal__button">🔙 Back</button>
                         </div>
                     </>
                 ) : (
                     <>
-                        <p>No hay partidas guardadas.</p>
-                        <button onClick={handleBack} className="menu-principal__button">🔙 Volver</button>
+                        <p>No saved games found.</p>
+                        <button onClick={handleBack} className="menu-principal__button">🔙 Back</button>
                     </>
                 )}
 

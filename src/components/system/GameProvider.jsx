@@ -2,89 +2,120 @@ import React, { createContext, useReducer, useContext } from 'react';
 import GameDataTemplate from './GameDataTemplate';
 
 function clamp(value, min, max) {
-    return Math.max(min, Math.min(max, value));
+  return Math.max(min, Math.min(max, value));
 }
 
 const GameContext = createContext();
 
 function gameReducer(state, action) {
-    switch (action.type) {
-        case 'SET_NOMBRE':
-            return { ...state, nombre: action.valor };
+  switch (action.type) {
+    case 'SET_NAME':
+      return { ...state, name: action.value };
 
-        case 'SET_EDAD':
-            return { ...state, edad: clamp(action.valor, 17, 120) };
+    case 'SET_GENDER':
+      return { ...state, gender: action.value };
 
-        case 'SET_RAZA':
-            return { ...state, raza: action.valor };
+    case 'SET_AGE':
+      return { ...state, age: clamp(action.value, 17, 120) };
 
-        case 'SET_AFINIDAD':
-            return {
-                ...state,
-                afinidad: {
-                    ...state.afinidad,
-                    [action.personaje]: clamp((state.afinidad[action.personaje] || 0) + action.valor, -100, 100),
-                },
-            };
+    case 'SET_RACE':
+      return { ...state, race: action.value };
 
-        case 'UPDATE_REPUTACION':
-            return { ...state, reputacion: clamp(state.reputacion + action.valor, -100, 100) };
+    case 'SET_AFFINITY':
+      return {
+        ...state,
+        affinity: {
+          ...state.affinity,
+          [action.character]: clamp((state.affinity[action.character] || 0) + action.value, -100, 100),
+        },
+      };
 
-        case 'SET_STAT_MENTAL':
-            return {
-                ...state,
-                mental: {
-                    ...state.mental,
-                    [action.stat]: clamp((state.mental[action.stat] || 0) + action.valor, -999, 999),
-                },
-            };
+    case 'UPDATE_REPUTATION':
+      return { ...state, reputation: clamp(state.reputation + action.value, -100, 100) };
 
-        case 'SET_STAT_FISICO':
-            return {
-                ...state,
-                fisico: {
-                    ...state.fisico,
-                    [action.stat]: clamp((state.fisico[action.stat] || 0) + action.valor, -999, 999),
-                },
-            };
+    case 'SET_MENTAL_STAT':
+      return {
+        ...state,
+        mentalStats: {
+          ...state.mentalStats,
+          [action.stat]: clamp((state.mentalStats[action.stat] || 0) + action.value, -999, 999),
+        },
+      };
 
-        case 'DELETE_AFINIDAD':
-            const newAfinidad = { ...state.afinidad };
-            delete newAfinidad[action.personaje];
-            return { ...state, afinidad: newAfinidad };
+    case 'SET_COMBAT_STAT':
+      return {
+        ...state,
+        combatStats: {
+          ...state.combatStats,
+          [action.stat]: clamp((state.combatStats[action.stat] || 0) + action.value, -999, 999),
+        },
+      };
 
-        case 'DELETE_STAT_MENTAL':
-            const newMental = { ...state.mental };
-            delete newMental[action.stat];
-            return { ...state, mental: newMental };
-
-        case 'DELETE_STAT_FISICO':
-            const newFisico = { ...state.fisico };
-            delete newFisico[action.stat];
-            return { ...state, fisico: newFisico };
-
-        case 'LOAD_FULL_STATE':
-            return { ...state, ...action.valor };
-
-        default:
-            return state;
+    case 'DELETE_AFFINITY': {
+      const newAffinity = { ...state.affinity };
+      delete newAffinity[action.character];
+      return { ...state, affinity: newAffinity };
     }
+
+    case 'DELETE_MENTAL_STAT': {
+      const newMental = { ...state.mentalStats };
+      delete newMental[action.stat];
+      return { ...state, mentalStats: newMental };
+    }
+
+    case 'DELETE_COMBAT_STAT': {
+      const newCombat = { ...state.combatStats };
+      delete newCombat[action.stat];
+      return { ...state, combatStats: newCombat };
+    }
+
+    case 'SET_GOLD':
+      return { ...state, gold: clamp(action.value, 0, 9999999) };
+
+    case 'SET_ZONE':
+      return { ...state, zone: action.value };
+
+    case 'SET_LEVEL':
+      return { ...state, level: clamp(action.value, 1, 999) };
+
+    case 'SET_EXPERIENCE':
+      return { ...state, experience: clamp(action.value, 0, 9999999) };
+
+    case 'SET_EQUIPMENT':
+      return {
+        ...state,
+        equipment: {
+          ...state.equipment,
+          [action.slot]: action.item,
+        },
+      };
+
+    case 'LOAD_FULL_STATE':
+      return { ...state, ...action.value };
+
+    default:
+      return state;
+  }
 }
 
 export function GameProvider({ children }) {
-    const [state, dispatch] = useReducer(gameReducer, GameDataTemplate);
+  const [state, dispatch] = useReducer(gameReducer, GameDataTemplate);
 
-    return (
-        <GameContext.Provider value={{ state, dispatch }}>
-            {children}
-        </GameContext.Provider>
-    );
+  if (process.env.NODE_ENV === 'development') {
+    window.game = { state, dispatch };
+  }
+
+  return (
+    <GameContext.Provider value={{ state, dispatch }}>
+      {children}
+    </GameContext.Provider>
+  );
 }
 
 export function useGame() {
-    const context = useContext(GameContext);
-    if (!context) {
-        throw new Error('useGame debe usarse dentro de un GameProvider');
-    }
-    return context;
+  const context = useContext(GameContext);
+  if (!context) {
+    throw new Error('useGame must be used within a GameProvider');
+  }
+  return context;
 }

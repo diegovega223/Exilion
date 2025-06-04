@@ -17,11 +17,11 @@ export default function SaveScreen({ onBack }) {
             audio.play().catch(console.warn);
             audio.addEventListener('ended', () => {
                 saveGame(state, SLOT);
-                alert('Partida guardada.');
+                alert('Game saved.');
             }, { once: true });
         } else {
             saveGame(state, SLOT);
-            alert('Partida guardada.');
+            alert('Game saved.');
         }
     };
 
@@ -43,25 +43,25 @@ export default function SaveScreen({ onBack }) {
     return (
         <div className="stats-menu-container">
             <div className="menu-test stats-menu-panel visible">
-                <h2 className="menu-test__title">Guardar Partida</h2>
+                <h2 className="menu-test__title">Save Game</h2>
 
                 <div className="menu-test__section">
-                    <div className="menu-test__label"><strong>Archivo único</strong></div>
+                    <div className="menu-test__label"><strong>Single Save Slot</strong></div>
                     {hasData ? (
                         <>
-                            <div className="menu-test__label">Nombre: {data.nombre || 'N/A'}</div>
-                            <div className="menu-test__label">Edad: {data.edad || 'N/A'}</div>
-                            <div className="menu-test__label">Raza: {data.raza || 'N/A'}</div>
-                            <div className="menu-test__label">Reputación: {data.reputacion ?? 'N/A'}</div>
+                            <div className="menu-test__label">Name: {data.name || 'N/A'}</div>
+                            <div className="menu-test__label">Age: {data.age || 'N/A'}</div>
+                            <div className="menu-test__label">Race: {data.race || 'N/A'}</div>
+                            <div className="menu-test__label">Reputation: {data.reputation ?? 'N/A'}</div>
                         </>
                     ) : (
-                        <div className="menu-test__label">No hay partida guardada.</div>
+                        <div className="menu-test__label">No saved game found.</div>
                     )}
                 </div>
 
                 <div className="button-row">
-                    <button onClick={handleSave} className="menu-principal__button">💾 Guardar</button>
-                    <button onClick={handleBack} className="menu-principal__button">🔙 Volver</button>
+                    <button onClick={handleSave} className="menu-principal__button">💾 Save</button>
+                    <button onClick={handleBack} className="menu-principal__button">🔙 Back</button>
                 </div>
 
                 <audio ref={selectRef} src={selectSound} preload="auto" />
