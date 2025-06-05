@@ -15,6 +15,8 @@ import victoryMusic from '../../assets/audio/bgm/victory2.ogg';
 import checkBattleEnd from './BattleEnd';
 import VictoryModal from './VictoryModal';
 import { useGame } from '../system/GameProvider';
+import useEnemyTurn from '../../hooks/useEnemyTurn'; // Nuevo hook
+
 
 const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, isBoss }) => {
   const [menuState, setMenuState] = useState('main');
@@ -36,10 +38,10 @@ const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, i
   const [victoryMonsters, setVictoryMonsters] = useState([]);
   const { player, playerHp, setPlayerHp } = usePlayer();
   const { enemyList, setEnemyList } = useEnemies(enemies);
-  console.log('Música recibida:', music);
   const { playClick } = useBattleAudio(music, clickSfx);
   const { state, dispatch } = useGame();
   const [showDefeat, setShowDefeat] = useState(false);
+  
 
   const showMessage = useCallback((text, duration = 1500) => {
     setMessage(text);
@@ -85,45 +87,31 @@ const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, i
     nextTurn();
   }, [nextTurn, player.name, showMessage]);
 
-  useEffect(() => {
-    if (getCombatantType(turnIndex) !== 'enemy') {
-      setActiveEnemyIndex(null);
-      return;
-    }
-    if (enemyList.length === 0) return;
-    let enemy = enemyList[turnIndex - 1];
-    if (!enemy || enemy.currentHp <= 0) {
-      setActiveEnemyIndex(null);
-      setTimeout(() => nextTurn(), 300);
-      return;
-    }
-    setActiveEnemyIndex(turnIndex - 1);
-    setIsShaking(true);
-    const playerHitAudio = new Audio(require('../../assets/audio/se/hit.ogg'));
-    playerHitAudio.play();
+  // Hook que maneja el turno enemigo (antes era un useEffect largo aquí)
+  useEnemyTurn({
+    turnIndex,
+    enemyList,
+    player,
+    setPlayerHp,
+    setFloatingDamage,
+    setIsSelectingEnemy,
+    setSelectedEnemyIndex,
+    setActiveEnemyIndex,
+    setIsShaking,
+    showMessage,
+    nextTurn,
+    isDefending
+  });
 
-    const defendingNow = isDefending;
-    const dmg = require('./DamageCalculator').default(enemy.stats, player.stats, defendingNow);
+  // Fin de batalla y victoria/derrota
+  const handleVictoryClose = () => {
+    dispatch({ type: 'SET_EXPERIENCE', value: state.experience + victoryExp });
+    dispatch({ type: 'SET_GOLD', value: state.gold + victoryGold });
+    setShowVictory(false);
+  };
 
-    if (typeof setPlayerHp === 'function') {
-      setPlayerHp(prev => Math.max(prev - dmg, 0));
-    }
-    setFloatingDamage({ index: 'player', value: dmg });
-    setTimeout(() => setFloatingDamage(null), 600);
-    showMessage(`${enemy.name} ataca e inflige ${dmg} de daño.`);
-    setIsSelectingEnemy(false);
-    setSelectedEnemyIndex(null);
-    const shakeTimer = setTimeout(() => setIsShaking(false), 1000);
-    const timer = setTimeout(() => {
-      setActiveEnemyIndex(null);
-      nextTurn();
-    }, 3000);
-    return () => {
-      clearTimeout(timer);
-      clearTimeout(shakeTimer);
-    };
-  }, [turnIndex]);
-
+  // Chequeo de fin de batalla
+  // (puedes extraer esto a otro hook si quieres limpiar más)
   useEffect(() => {
     const result = checkBattleEnd(playerHp, enemyList);
     if (result && !battleResult) {
@@ -160,19 +148,15 @@ const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, i
         setTimeout(() => setShowDefeat(true), 2000);
       }
     }
-  }, [playerHp, enemyList, battleResult]);
+  }, [playerHp, enemyList, battleResult, state.experience, state.gold, victoryExp, victoryGold]);
 
-  const handleVictoryClose = () => {
-    dispatch({ type: 'SET_EXPERIENCE', value: state.experience + victoryExp });
-    dispatch({ type: 'SET_GOLD', value: state.gold + victoryGold });
-    setShowVictory(false);
-  };
-
+  // Resetear defensa al volver al turno del jugador
   useEffect(() => {
     if (getCombatantType(turnIndex) === 'player' && isDefending) {
       setIsDefending(false);
     }
   }, [turnIndex, isDefending]);
+
   return (
     <div className={`battle-scene ${isBoss ? 'boss' : ''} ${isShaking ? 'screen-shake' : ''} ${!showUI ? 'battle-finished' : ''}`}>
       <div className="battle-scene-wrapper">
