@@ -1,5 +1,5 @@
 import React, { createContext, useReducer, useContext } from 'react';
-import GameDataTemplate from './GameDataTemplate';
+import GameDataTemplate from './DebugGameData';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -100,7 +100,6 @@ function gameReducer(state, action) {
 
 export function GameProvider({ children }) {
   const [state, dispatch] = useReducer(gameReducer, GameDataTemplate);
-
   if (process.env.NODE_ENV === 'development') {
     window.game = { state, dispatch };
   }

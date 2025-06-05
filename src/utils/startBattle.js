@@ -11,7 +11,7 @@ export function startBattle({
   battleback1Name,
   battleback2Name,
   isBoss = false,
-  musicName = 'battleTheme',
+  musicName = 'battleTheme3',
 }) {
   const musicData = musicLibrary[musicName];
 
@@ -19,15 +19,20 @@ export function startBattle({
     console.warn(`⚠️ Tema de música '${musicName}' no encontrado. Usando silencio.`);
   }
 
-  const filteredEnemies = enemiesData
-    .filter(enemy => activeEnemyIds.includes(enemy.id))
-    .map(data => {
-      const enemy = new Enemy(data);
-      return {
-        ...enemy,
-        image: enemyImages[data.image],
-      };
-    });
+const filteredEnemies = activeEnemyIds.map((id, idx) => {
+  const data = enemiesData.find(enemy => enemy.id === id);
+  if (!data) return null;
+  const enemy = new Enemy(data);
+  const count = activeEnemyIds.slice(0, idx + 1).filter(eid => eid === id).length;
+  const letter = String.fromCharCode(64 + count);
+  return {
+    ...enemy,
+    image: enemyImages[data.image],
+    name: activeEnemyIds.filter(eid => eid === id).length > 1
+      ? `${enemy.name} ${letter}`
+      : enemy.name,
+  };
+}).filter(Boolean);
 
   return (
     <BattleScene

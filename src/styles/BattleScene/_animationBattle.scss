@@ -1,0 +1,108 @@
+.enemy.damaged img {
+  animation: damage-blink 0.3s steps(2, end);
+}
+
+@keyframes damage-blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    opacity: 0.2;
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+    opacity: 1;
+  }
+}
+
+.enemy.dead img {
+  animation: enemy-death 1s forwards;
+}
+
+@keyframes enemy-death {
+  0% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+
+  60% {
+    opacity: 0.7;
+    transform: scale(1.1) rotate(-10deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.7) rotate(20deg);
+  }
+}
+
+.enemy.dead {
+  pointer-events: none;
+}
+
+.damage-popup {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -50%);
+  color: hsl(0, 0%, 100%);
+  font-size: 3rem;
+  font-weight: bold;
+  pointer-events: none;
+  animation: damage-float 0.5s ease-out forwards;
+  text-shadow: 2px 2px 8px #000, 0 0 12px #fff;
+}
+
+@keyframes damage-float {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  10% {
+    opacity: 1;
+    transform: translate(-50%, -180%) scale(1.3);
+  }
+  90% {
+    opacity: 1;
+    transform: translate(-50%, -180%) scale(1.3);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -180%) scale(1.3);
+  }
+}
+.screen-shake {
+  animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translateX(-4px); }
+  20%, 80% { transform: translateX(8px); }
+  30%, 50%, 70% { transform: translateX(-12px); }
+  40%, 60% { transform: translateX(12px); }
+  100% { transform: translateX(0); }
+}
+
+.enemy {
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.enemy.active {
+  animation: enemy-step-forward 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  z-index: 2;
+}
+
+@keyframes enemy-step-forward {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(48px); }
+}

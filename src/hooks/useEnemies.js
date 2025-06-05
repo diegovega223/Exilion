@@ -2,11 +2,20 @@ import { useState } from 'react';
 import { Enemy } from '../data/Enemy';
 
 const createEnemyInstances = (enemyRawData) =>
-  enemyRawData.map(data => new Enemy(data));
+  enemyRawData.map(data => {
+    const instance = new Enemy(data);
+    return {
+      ...instance,
+      name: data.name,
+      experience: data.experience,
+      gold: data.gold,
+      currentHp: instance.stats.hp
+    };
+  });
 
 export default function useEnemies(enemies) {
   const [enemyList, setEnemyList] = useState(() =>
-    createEnemyInstances(enemies).map(enemy => ({ ...enemy, currentHp: enemy.stats.hp }))
+    createEnemyInstances(enemies)
   );
   return { enemyList, setEnemyList };
 }

@@ -85,7 +85,7 @@ export const enemiesData = [
     name: "Goblin",
     image: "Goblin.png",
     stats: {
-      hp: 80,
+      hp: 40,
       hpMax: 80,
       ep: 0,
       epMax: 0,

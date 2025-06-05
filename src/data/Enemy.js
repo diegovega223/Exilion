@@ -1,21 +1,21 @@
 export class Enemy {
   constructor({
     id,
-    nv = 1,
+    level = 1,
     name,
     image = '',
     stats = {},
     elements = {},
-    ataques = [],
-    experiencia = 0,
-    oro = 0,
-    probabilidadEscape = 0,
+    attacks = [],
+    experience = 0,
+    gold = 0,
+    escapeChance = 0,
     hpEscapeThreshold = 0,
-    estados = [],
+    statusEffects = [],
     spotted = false,
   }) {
     this.id = id;
-    this.nv = nv;
+    this.level = level;
     this.name = name;
     this.image = image;
 
@@ -47,12 +47,12 @@ export class Enemy {
       ...elements,
     };
 
-    this.ataques = ataques.length > 0 ? ataques : [{ id: 0, regularidad: 100 }];
-    this.experiencia = experiencia;
-    this.oro = oro;
-    this.probabilidadEscape = probabilidadEscape;
+    this.attacks = attacks.length > 0 ? attacks : [{ id: 0, weight: 100 }];
+    this.experience = experience;
+    this.gold = gold;
+    this.escapeChance = escapeChance;
     this.hpEscapeThreshold = hpEscapeThreshold;
-    this.estados = estados;
+    this.statusEffects = statusEffects;
     this.spotted = spotted;
   }
 }

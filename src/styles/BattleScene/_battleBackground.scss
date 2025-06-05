@@ -83,3 +83,8 @@
     0%   { background-position: center; }
     100% { background-position: calc(50% - 40px) center; }
 }
+
+.battle-finished .battleback-layer,
+.battle-finished .battle-scene-content {
+  animation-play-state: paused !important;
+}

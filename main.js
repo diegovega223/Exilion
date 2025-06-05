@@ -16,9 +16,7 @@ function createWindow() {
   if (app.isPackaged) {
 
     const indexPath = path.join(__dirname, 'build', 'index.html');
-   // console.log('Cargando archivo:', indexPath);
     win.loadFile(indexPath);
-  //  win.webContents.openDevTools(); // para debug
   }
   else {
     win.loadURL('http://localhost:3000');

@@ -1,44 +1,33 @@
-import { useRef, useState } from 'react';
-
-const getPlayerFromStorage = () => {
-  try {
-    const savedData = localStorage.getItem('exilion-save');
-    if (!savedData) return null;
-    const playerData = JSON.parse(savedData);
-    return {
-      name: playerData.name || 'Jugador',
-      stats: {
-        hp: playerData.combatStats?.hp ?? 100,
-        hpMax: playerData.combatStats?.hpMax ?? 100,
-        ep: playerData.combatStats?.ep ?? 50,
-        epMax: playerData.combatStats?.epMax ?? 50,
-        mp: playerData.combatStats?.mp ?? 30,
-        mpMax: playerData.combatStats?.mpMax ?? 30,
-        atk: playerData.combatStats?.atk ?? 10,
-        def: playerData.combatStats?.def ?? 10,
-        agi: playerData.combatStats?.agi ?? 10,
-        dex: playerData.combatStats?.dex ?? 10,
-        eva: playerData.combatStats?.eva ?? 5,
-        crit: playerData.combatStats?.crit ?? 5,
-        luck: playerData.combatStats?.luck ?? 0,
-        inf: playerData.combatStats?.inf ?? 0,
-        fire: playerData.elements?.fire ?? 0,
-        water: playerData.elements?.water ?? 0,
-        earth: playerData.elements?.earth ?? 0,
-        air: playerData.elements?.air ?? 0,
-        light: playerData.elements?.light ?? 0,
-        darkness: playerData.elements?.darkness ?? 0,
-      }
-    };
-  } catch (error) {
-    console.error('Error leyendo jugador de localStorage:', error);
-    return null;
-  }
-};
+import { useState } from 'react';
+import { useGame } from '../components/system/GameProvider';
 
 export default function usePlayer() {
-  const storedPlayer = useRef(getPlayerFromStorage());
-  const player = storedPlayer.current;
+  const { state } = useGame();
+  const player = {
+    name: state.name || 'Jugador',
+    stats: {
+      hp: state.combatStats?.hp ?? 100,
+      hpMax: state.combatStats?.hpMax ?? 100,
+      ep: state.combatStats?.ep ?? 50,
+      epMax: state.combatStats?.epMax ?? 50,
+      mp: state.combatStats?.mp ?? 30,
+      mpMax: state.combatStats?.mpMax ?? 30,
+      atk: state.combatStats?.atk ?? 10,
+      def: state.combatStats?.def ?? 10,
+      agi: state.combatStats?.agi ?? 10,
+      dex: state.combatStats?.dex ?? 10,
+      eva: state.combatStats?.eva ?? 5,
+      crit: state.combatStats?.crit ?? 5,
+      luck: state.combatStats?.luck ?? 0,
+      inf: state.combatStats?.inf ?? 0,
+      fire: state.elements?.fire ?? 0,
+      water: state.elements?.water ?? 0,
+      earth: state.elements?.earth ?? 0,
+      air: state.elements?.air ?? 0,
+      light: state.elements?.light ?? 0,
+      darkness: state.elements?.darkness ?? 0,
+    }
+  };
   const [playerHp, setPlayerHp] = useState(player.stats.hp);
   return { player, playerHp, setPlayerHp };
 }

@@ -1,15 +1,20 @@
 import { useState, useCallback, useEffect } from 'react';
-import { nextTurnIndex, getCombatantType, playerAttack, enemyAttack } from './TurnSystem';
-import calculateDamage from './DamageCalculator';
-import checkBattleEnd from './BattleEnd';
 import usePlayer from '../../hooks/usePlayer';
 import useEnemies from '../../hooks/useEnemies';
 import useBattleAudio from '../../hooks/useBattleAudio';
+import usePlayerAttack from '../../hooks/usePlayerAttack';
+import { nextTurnIndex, getCombatantType } from './TurnSystem';
 import PlayerHpBar from './PlayerHpBar';
 import EnemyList from './EnemyList';
 import BattleMenu from './BattleMenu';
+import MessageBox from './MessageBox';
+import TurnIndicator from './TurnIndicator';
 import clickSfx from '../../assets/audio/se/select.ogg';
 import battleMusic from '../../assets/audio/bgm/a-new-adventure.ogg';
+import victoryMusic from '../../assets/audio/bgm/victory2.ogg';
+import checkBattleEnd from './BattleEnd';
+import VictoryModal from './VictoryModal';
+import { useGame } from '../system/GameProvider';
 
 const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, isBoss }) => {
   const [menuState, setMenuState] = useState('main');
@@ -18,10 +23,23 @@ const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, i
   const [isDefending, setIsDefending] = useState(false);
   const [selectedEnemyIndex, setSelectedEnemyIndex] = useState(null);
   const [isSelectingEnemy, setIsSelectingEnemy] = useState(false);
-
+  const [damagedEnemyIndex, setDamagedEnemyIndex] = useState(null);
+  const [deadEnemies, setDeadEnemies] = useState([]);
+  const [floatingDamage, setFloatingDamage] = useState(null);
+  const [isShaking, setIsShaking] = useState(false);
+  const [activeEnemyIndex, setActiveEnemyIndex] = useState(null);
+  const [battleResult, setBattleResult] = useState(null);
+  const [showUI, setShowUI] = useState(true);
+  const [showVictory, setShowVictory] = useState(false);
+  const [victoryExp, setVictoryExp] = useState(0);
+  const [victoryGold, setVictoryGold] = useState(0);
+  const [victoryMonsters, setVictoryMonsters] = useState([]);
   const { player, playerHp, setPlayerHp } = usePlayer();
   const { enemyList, setEnemyList } = useEnemies(enemies);
+  console.log('Música recibida:', music);
   const { playClick } = useBattleAudio(music, clickSfx);
+  const { state, dispatch } = useGame();
+  const [showDefeat, setShowDefeat] = useState(false);
 
   const showMessage = useCallback((text, duration = 1500) => {
     setMessage(text);
@@ -35,36 +53,29 @@ const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, i
 
   const totalCombatants = 1 + enemyList.length;
   const nextTurn = useCallback(() => {
-    setTurnIndex(prev => nextTurnIndex(prev, totalCombatants));
-  }, [totalCombatants]);
+    setTurnIndex(prev => nextTurnIndex(prev, totalCombatants, enemyList));
+  }, [totalCombatants, enemyList]);
 
-  // Cuando el usuario hace clic en "Atacar", habilita la selección de enemigo
   const handleAttackButton = useCallback(() => {
     setIsSelectingEnemy(true);
     showMessage('Selecciona un enemigo para atacar.');
   }, [showMessage]);
 
-  // Cuando el usuario selecciona un enemigo, realiza el ataque
-  const handleEnemyClick = useCallback((index) => {
-    if (!isSelectingEnemy || getCombatantType(turnIndex) !== 'player') return;
-    if (!enemyList[index]) return;
-    const { updatedEnemies } = playerAttack(
-      player,
-      enemyList,
-      calculateDamage,
-      showMessage,
-      index
-    );
-    setEnemyList(updatedEnemies);
-    setSelectedEnemyIndex(null);
-    setIsSelectingEnemy(false);
-    const result = checkBattleEnd(playerHp, updatedEnemies);
-    if (result === 'victory') {
-      showMessage('¡Has ganado la batalla!', 2500);
-      return;
-    }
-    nextTurn();
-  }, [isSelectingEnemy, enemyList, player, playerHp, showMessage, setEnemyList, turnIndex, nextTurn]);
+  const { handleEnemyClick } = usePlayerAttack({
+    isSelectingEnemy,
+    turnIndex,
+    enemyList,
+    player,
+    setDamagedEnemyIndex,
+    setFloatingDamage,
+    setEnemyList,
+    showMessage,
+    setDeadEnemies,
+    setSelectedEnemyIndex,
+    setIsSelectingEnemy,
+    playerHp,
+    nextTurn
+  });
 
   const handlePlayerDefend = useCallback(() => {
     showMessage(`${player.name} se defiende. Daño reducido en el próximo ataque.`);
@@ -75,29 +86,87 @@ const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, i
   }, [nextTurn, player.name, showMessage]);
 
   useEffect(() => {
-    if (getCombatantType(turnIndex) !== 'enemy') return;
-    if (enemyList.length === 0) return;
-    const enemy = enemyList[turnIndex - 1];
-    if (!enemy || enemy.currentHp <= 0) {
-      nextTurn();
+    if (getCombatantType(turnIndex) !== 'enemy') {
+      setActiveEnemyIndex(null);
       return;
     }
-    const dmg = enemyAttack(enemy, player.stats, isDefending, calculateDamage, showMessage);
-    setPlayerHp(prevHp => {
-      const newHp = Math.max(prevHp - dmg, 0);
-      const result = checkBattleEnd(newHp, enemyList);
-      if (result === 'defeat') showMessage('¡Has sido derrotado!', 2500);
-      return newHp;
-    });
+    if (enemyList.length === 0) return;
+    let enemy = enemyList[turnIndex - 1];
+    if (!enemy || enemy.currentHp <= 0) {
+      setActiveEnemyIndex(null);
+      setTimeout(() => nextTurn(), 300);
+      return;
+    }
+    setActiveEnemyIndex(turnIndex - 1);
+    setIsShaking(true);
+    const playerHitAudio = new Audio(require('../../assets/audio/se/hit.ogg'));
+    playerHitAudio.play();
+    const dmg = require('./DamageCalculator').default(enemy.stats, player.stats, isDefending);
+    if (typeof setPlayerHp === 'function') {
+      setPlayerHp(prev => Math.max(prev - dmg, 0));
+    }
+    setFloatingDamage({ index: 'player', value: dmg });
+    setTimeout(() => setFloatingDamage(null), 600);
+    showMessage(`${enemy.name} ataca e inflige ${dmg} de daño.`);
     setIsDefending(false);
     setIsSelectingEnemy(false);
     setSelectedEnemyIndex(null);
-    const timer = setTimeout(nextTurn, 3000);
-    return () => clearTimeout(timer);
-  }, [turnIndex, enemyList, isDefending, nextTurn, player.stats, showMessage, setPlayerHp]);
+    const shakeTimer = setTimeout(() => setIsShaking(false), 1000);
+    const timer = setTimeout(() => {
+      setActiveEnemyIndex(null);
+      nextTurn();
+    }, 3000);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(shakeTimer);
+    };
+  }, [turnIndex, isDefending]);
+
+  useEffect(() => {
+    const result = checkBattleEnd(playerHp, enemyList);
+    if (result && !battleResult) {
+      setBattleResult(result);
+      setShowUI(false);
+      if (window.battleBgm) {
+        const fadeOut = setInterval(() => {
+          if (window.battleBgm.volume > 0.05) {
+            window.battleBgm.volume -= 0.05;
+          } else {
+            window.battleBgm.pause();
+            window.battleBgm.currentTime = 0;
+            clearInterval(fadeOut);
+            if (result === 'victory') {
+              const victory = new Audio(victoryMusic);
+              victory.volume = 1;
+              victory.play();
+            }
+          }
+        }, 100);
+      }
+      if (result === 'victory') {
+        const monsters = enemyList.map(e => ({
+          name: e.name,
+          exp: e.experience || e.exp || 0,
+          gold: e.gold || 0
+        }));
+        setVictoryMonsters(monsters);
+        setVictoryExp(monsters.reduce((sum, m) => sum + m.exp, 0));
+        setVictoryGold(monsters.reduce((sum, m) => sum + m.gold, 0));
+        setTimeout(() => setShowVictory(true), 2000);
+      }
+      if (result === 'defeat') {
+        setTimeout(() => setShowDefeat(true), 2000);
+      }
+    }
+  }, [playerHp, enemyList, battleResult]);
+  const handleVictoryClose = () => {
+    dispatch({ type: 'SET_EXPERIENCE', value: state.experience + victoryExp });
+    dispatch({ type: 'SET_GOLD', value: state.gold + victoryGold });
+    setShowVictory(false);
+  };
 
   return (
-    <div className={`battle-scene ${isBoss ? 'boss' : ''}`}>
+    <div className={`battle-scene ${isBoss ? 'boss' : ''} ${isShaking ? 'screen-shake' : ''} ${!showUI ? 'battle-finished' : ''}`}>
       <div className="battle-scene-wrapper">
         <div className="battle-scene-content">
           <div className="battleback-layer back1" style={{ backgroundImage: `url(${battleback1})` }} />
@@ -112,32 +181,51 @@ const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, i
                 handleEnemyClick(index);
               } : undefined}
               isSelectingEnemy={isSelectingEnemy}
+              damagedEnemyIndex={damagedEnemyIndex}
+              deadEnemies={deadEnemies}
+              floatingDamage={floatingDamage}
+              activeEnemyIndex={activeEnemyIndex}
             />
           </div>
         </div>
       </div>
-      <div className="status-bar">
-        <PlayerHpBar player={player} playerHp={playerHp} />
-      </div>
-      <BattleMenu
-        menuState={menuState}
-        handleClick={handleClick}
-        handlePlayerAttack={handleAttackButton}
-        handlePlayerDefend={handlePlayerDefend}
-        setMenuState={setMenuState}
-        showMessage={showMessage}
-        turnIndex={turnIndex}
-        getCombatantType={getCombatantType}
-        isSelectingEnemy={isSelectingEnemy}
-      />
-      <div className="turn-indicator bottom-left">
-        Turno de: <strong>{getCombatantType(turnIndex) === 'player' ? player.name : enemyList[turnIndex - 1]?.name || '...'}</strong>
-      </div>
-      {message && (
-        <div className="message-box">
-          <p>{message}</p>
-        </div>
+      {showUI && (
+        <>
+          <div className="status-bar">
+            <PlayerHpBar player={player} playerHp={playerHp} />
+          </div>
+          <BattleMenu
+            menuState={menuState}
+            handleClick={handleClick}
+            handlePlayerAttack={handleAttackButton}
+            handlePlayerDefend={handlePlayerDefend}
+            setMenuState={setMenuState}
+            showMessage={showMessage}
+            turnIndex={turnIndex}
+            getCombatantType={getCombatantType}
+            isSelectingEnemy={isSelectingEnemy}
+          />
+          <TurnIndicator
+            turnIndex={turnIndex}
+            getCombatantType={getCombatantType}
+            player={player}
+            enemyList={enemyList}
+          />
+        </>
       )}
+      <MessageBox message={message} visible={!!message} />
+      {showVictory && (
+        <VictoryModal
+          exp={victoryExp}
+          gold={victoryGold}
+          monsters={victoryMonsters}
+          playerName={player.name}
+          playerExp={state.experience}
+          playerExpMax={state.experienceMax}
+          onClose={handleVictoryClose}
+        />
+      )}
+      {showDefeat && (null)}
     </div>
   );
 };
