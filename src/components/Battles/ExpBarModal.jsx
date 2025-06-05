@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import expTick from '../../assets/audio/se/select.ogg';
+import audio from '@audio';
+
+const expTick = audio.se.select.path;
 
 const ExpBarModal = ({ playerName, expBefore, expGain, expMax, onClose }) => {
   const [displayExp, setDisplayExp] = useState(expBefore);

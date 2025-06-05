@@ -1,7 +1,9 @@
 import React, { useRef } from 'react';
 import StatsMenu from './StatsMenu';
 import StatEditor from './StatEditor';
-import selectSound from '../../assets/audio/se/select.ogg';
+import audio from '@audio';
+
+const selectSound = audio.se.select.path;
 
 export default function DebugScreen({ onBack }) {
     const selectRef = React.useRef(null);

@@ -1,7 +1,9 @@
 import React, { useEffect, useImperativeHandle, forwardRef, useRef } from 'react';
-import bgm from '../../assets/audio/bgm/menu-theme.ogg';
+import audio from '@audio';
 
-const audioInstance = new Audio(bgm);
+const mainMenuAudio = audio.bgm.mainMenu.path;
+
+const audioInstance = new Audio(mainMenuAudio);
 audioInstance.loop = true;
 audioInstance.volume = 1;
 

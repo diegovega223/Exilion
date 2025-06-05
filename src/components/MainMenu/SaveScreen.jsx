@@ -1,7 +1,9 @@
 import React, { useRef } from 'react';
-import { useGame } from '../system/GameProvider';
+import { useGame } from '@game';
 import { saveGame, loadGame, hasSavedGame } from '../system/SaveManager';
-import selectSound from '../../assets/audio/se/select.ogg';
+import audio from '@audio';
+
+const selectSound = audio.se.select.path;
 
 export default function SaveScreen({ onBack }) {
     const { state } = useGame();

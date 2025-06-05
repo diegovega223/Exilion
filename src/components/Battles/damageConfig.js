@@ -1,5 +1,3 @@
-// damageConfig.js
-
 const damageConfig = {
     multipliers: {
         playerAttack: 1.2,

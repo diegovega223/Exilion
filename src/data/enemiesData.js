@@ -37,7 +37,8 @@ export const enemiesData = [
     escapeChance: 40,
     hpEscapeThreshold: 30,
     statusEffects: [],
-    spotted: false
+    spotted: false,
+    personality: "ambusher"
   },
   {
     id: 2,
@@ -77,7 +78,8 @@ export const enemiesData = [
     escapeChance: 30,
     hpEscapeThreshold: 50,
     statusEffects: [],
-    spotted: false
+    spotted: false,
+    personality: "strategist"
   },
   {
     id: 3,
@@ -117,6 +119,7 @@ export const enemiesData = [
     escapeChance: 20,
     hpEscapeThreshold: 15,
     statusEffects: [],
-    spotted: false
+    spotted: false,
+    personality: "balanced"
   }
 ];

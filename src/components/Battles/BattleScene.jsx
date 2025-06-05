@@ -1,27 +1,14 @@
-import { useState, useCallback, useEffect } from 'react';
-import usePlayer from '../../hooks/usePlayer';
-import useEnemies from '../../hooks/useEnemies';
-import useBattleAudio from '../../hooks/useBattleAudio';
-import usePlayerAttack from '../../hooks/usePlayerAttack';
-import { nextTurnIndex, getCombatantType } from './TurnSystem';
-import PlayerHpBar from './PlayerHpBar';
-import EnemyList from './EnemyList';
-import BattleMenu from './BattleMenu';
-import MessageBox from './MessageBox';
-import TurnIndicator from './TurnIndicator';
-import clickSfx from '../../assets/audio/se/select.ogg';
-import battleMusic from '../../assets/audio/bgm/a-new-adventure.ogg';
-import victoryMusic from '../../assets/audio/bgm/victory2.ogg';
-import VictoryModal from './VictoryModal';
-import { useGame } from '../system/GameProvider';
-import useEnemyTurn from '../../hooks/useEnemyTurn';
-import useBattleEnd from '../../hooks/useBattleEnd';
-import useBattleMenu from '../../hooks/useBattleMenu';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { useGame } from '@game';
+import { BattleMenu, EnemyList, MessageBox, PlayerHpBar, TurnIndicator, VictoryModal, nextTurnIndex, getCombatantType } from '.';
+import { useBattleAudio, useBattleEnd, useBattleMenu, useEnemies, useEnemyTurn, usePlayer, usePlayerAttack } from '@hooksBattles';
+import audio from '@audio';
 
-const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, isBoss }) => {
+const BattleScene = ({ battleback1, battleback2, enemies, music = audio.bgm.battleTheme1.path, isBoss }) => {
   const [turnIndex, setTurnIndex] = useState(0);
   const [message, setMessage] = useState('');
   const [isDefending, setIsDefending] = useState(false);
+  const isDefendingRef = useRef(false);
   const [selectedEnemyIndex, setSelectedEnemyIndex] = useState(null);
   const [isSelectingEnemy, setIsSelectingEnemy] = useState(false);
   const [damagedEnemyIndex, setDamagedEnemyIndex] = useState(null);
@@ -29,6 +16,10 @@ const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, i
   const [floatingDamage, setFloatingDamage] = useState(null);
   const [isShaking, setIsShaking] = useState(false);
   const [activeEnemyIndex, setActiveEnemyIndex] = useState(null);
+
+  const clickSfx = audio.se.select.path;
+  const victoryMusic = audio.bgm.victory.path;
+
   const { player, playerHp, setPlayerHp } = usePlayer();
   const { enemyList, setEnemyList } = useEnemies(enemies);
   const { playClick } = useBattleAudio(music, clickSfx);
@@ -92,9 +83,14 @@ const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, i
     player,
   });
 
+  useEffect(() => {
+    isDefendingRef.current = isDefending;
+  }, [isDefending]);
+
   useEnemyTurn({
     turnIndex,
     enemyList,
+    setEnemyList,
     player,
     setPlayerHp,
     setFloatingDamage,
@@ -104,7 +100,7 @@ const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, i
     setIsShaking,
     showMessage,
     nextTurn,
-    isDefending
+    isDefendingRef
   });
 
   useEffect(() => {
@@ -141,6 +137,7 @@ const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, i
         <>
           <div className="status-bar">
             <PlayerHpBar player={player} playerHp={playerHp} />
+            {isDefending && <p className="text-blue-400 font-bold">🛡️ Defendiendo</p>}
           </div>
           <BattleMenu
             menuState={menuState}

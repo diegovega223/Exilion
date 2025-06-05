@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import startSound from '../../assets/audio/se/game-start.ogg';
+import audio from '@audio';
+
+const startSound = audio.se.gameStart.path;
 
 export default function StartScreen({ onStart }) {
     const soundRef = useRef(null);

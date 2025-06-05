@@ -1,5 +1,5 @@
 import React from 'react';
-import { useGame } from '../system/GameProvider';
+import { useGame } from '@game';
 import { razasDisponibles, clavesMental, clavesFisico } from '../../data/characterData';
 
 export default function StatsMenu() {

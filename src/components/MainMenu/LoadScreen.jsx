@@ -1,7 +1,9 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { useGame } from '../system/GameProvider';
+import { useGame } from '@game';
 import { loadGame, hasSavedGame } from '../system/SaveManager';
-import selectSound from '../../assets/audio/se/select.ogg';
+import audio from '@audio';
+
+const selectSound = audio.se.select.path;
 
 function formatTime(seconds) {
     if (!seconds && seconds !== 0) return 'N/A';

@@ -13,6 +13,7 @@ export class Enemy {
     hpEscapeThreshold = 0,
     statusEffects = [],
     spotted = false,
+    personality = 'balanced'
   }) {
     this.id = id;
     this.level = level;
@@ -54,5 +55,6 @@ export class Enemy {
     this.hpEscapeThreshold = hpEscapeThreshold;
     this.statusEffects = statusEffects;
     this.spotted = spotted;
+    this.personality = personality;
   }
 }

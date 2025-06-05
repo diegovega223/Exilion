@@ -1,5 +1,5 @@
 const DebugGameData = {
-  name: 'Debug',
+  name: 'Jugador',
   gender: 'Otro',
   age: 25,
   race: 'Humano',
@@ -12,12 +12,12 @@ const DebugGameData = {
   experienceMax: 200,
   combatStats: {
     hp: 300,
-    hpMax: 120,
+    hpMax: 300,
     ep: 60,
     epMax: 60,
     mp: 40,
     mpMax: 40,
-    atk: 100,
+    atk: 10,
     def: 12,
     agi: 10,
     dex: 10,

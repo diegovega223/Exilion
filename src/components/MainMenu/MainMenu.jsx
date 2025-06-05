@@ -1,15 +1,7 @@
 import React, { useRef, useState } from 'react';
-import TitleScreen from './TitleScreen';
-import StartScreen from './StartScreen';
-import MenuOptions from './MenuOptions';
-import LoadScreen from './LoadScreen';
-import SaveScreen from './SaveScreen';
-import OptionsScreen from './OptionsScreen';
-import DebugScreen from './DebugScreen';
-import BackgroundMusic from './BackgroundMusic';
+import { TitleScreen, StartScreen, MenuOptions, LoadScreen, SaveScreen, OptionsScreen, DebugScreen, BackgroundMusic } from './MainMenu';
 import tituloImage from '../../assets/img/system/titulo.png';
 import GameStart from '../Intro/Intro';
-
 
 export default function MainMenu() {
     const [view, setView] = useState('title');

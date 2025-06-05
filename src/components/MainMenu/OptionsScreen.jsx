@@ -1,5 +1,7 @@
 import React, { useRef } from 'react';
-import selectSound from '../../assets/audio/se/select.ogg';
+import audio from '@audio';
+
+const selectSound = audio.se.select.path;
 
 export default function OptionsScreen({ onBack }) {
     const selectRef = useRef(null);

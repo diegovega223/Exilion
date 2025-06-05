@@ -1,6 +1,6 @@
 // src/App.js
 import React from 'react';
-import { GameProvider } from './components/system/GameProvider';
+import { GameProvider } from '@game';
 import BattleTest from '../src/components/Intro/BattleTest';
 import './styles/main.scss';
 
