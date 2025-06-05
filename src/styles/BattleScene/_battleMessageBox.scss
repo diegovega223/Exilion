@@ -1,14 +1,36 @@
 .message-box {
   position: absolute;
-  top: 20px;
+  top: clamp(10px, 2vw, 32px);
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0, 0, 0, 0.7);
   color: white;
-  padding: 12px 20px;
-  border-radius: 12px;
-  font-size: 16px;
-  max-width: 80%;
+  padding: clamp(6px, 1vw, 18px) clamp(12px, 2.5vw, 32px);
+  border-radius: 0.7vw;
+  font-size: clamp(0.95rem, 1.1vw, 1.15rem);
+  max-width: 60vw;
+  min-width: 140px;
   text-align: center;
   z-index: 100;
+  box-shadow: 0 0 12px rgba(0,0,0,0.4);
+  pointer-events: none;
+}
+
+/* Para pantallas medianas */
+@media (max-width: 1200px) {
+  .message-box {
+    max-width: 80vw;
+    font-size: clamp(0.95rem, 1vw, 1.1rem);
+    padding: clamp(6px, 1.5vw, 14px) clamp(10px, 3vw, 24px);
+  }
+}
+
+@media (max-width: 600px) {
+  .message-box {
+    padding: 0.5em 0.2em;
+    font-size: 0.5rem;
+    max-width: 96vw;
+    min-width: 0;
+    top: 2vw;
+  }
 }

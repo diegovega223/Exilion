@@ -101,14 +101,16 @@ const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, i
     setIsShaking(true);
     const playerHitAudio = new Audio(require('../../assets/audio/se/hit.ogg'));
     playerHitAudio.play();
-    const dmg = require('./DamageCalculator').default(enemy.stats, player.stats, isDefending);
+
+    const defendingNow = isDefending;
+    const dmg = require('./DamageCalculator').default(enemy.stats, player.stats, defendingNow);
+
     if (typeof setPlayerHp === 'function') {
       setPlayerHp(prev => Math.max(prev - dmg, 0));
     }
     setFloatingDamage({ index: 'player', value: dmg });
     setTimeout(() => setFloatingDamage(null), 600);
     showMessage(`${enemy.name} ataca e inflige ${dmg} de daño.`);
-    setIsDefending(false);
     setIsSelectingEnemy(false);
     setSelectedEnemyIndex(null);
     const shakeTimer = setTimeout(() => setIsShaking(false), 1000);
@@ -120,7 +122,7 @@ const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, i
       clearTimeout(timer);
       clearTimeout(shakeTimer);
     };
-  }, [turnIndex, isDefending]);
+  }, [turnIndex]);
 
   useEffect(() => {
     const result = checkBattleEnd(playerHp, enemyList);
@@ -159,12 +161,18 @@ const BattleScene = ({ battleback1, battleback2, enemies, music = battleMusic, i
       }
     }
   }, [playerHp, enemyList, battleResult]);
+
   const handleVictoryClose = () => {
     dispatch({ type: 'SET_EXPERIENCE', value: state.experience + victoryExp });
     dispatch({ type: 'SET_GOLD', value: state.gold + victoryGold });
     setShowVictory(false);
   };
 
+  useEffect(() => {
+    if (getCombatantType(turnIndex) === 'player' && isDefending) {
+      setIsDefending(false);
+    }
+  }, [turnIndex, isDefending]);
   return (
     <div className={`battle-scene ${isBoss ? 'boss' : ''} ${isShaking ? 'screen-shake' : ''} ${!showUI ? 'battle-finished' : ''}`}>
       <div className="battle-scene-wrapper">
