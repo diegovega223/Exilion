@@ -16,6 +16,11 @@ const musicLibrary = {
         author: "LeviathanMusic",
         path: require('../assets/audio/bgm/the-golden-guardian.ogg'),
     },
+    battleTheme4: {
+        name: "Darken Remix",
+        author: "Marcos",
+        path: require('../assets/audio/bgm/darken-remix.ogg'),
+    },
 };
 
 export default musicLibrary;

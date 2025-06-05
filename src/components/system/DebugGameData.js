@@ -17,7 +17,7 @@ const DebugGameData = {
     epMax: 60,
     mp: 40,
     mpMax: 40,
-    atk: 15,
+    atk: 100,
     def: 12,
     agi: 10,
     dex: 10,

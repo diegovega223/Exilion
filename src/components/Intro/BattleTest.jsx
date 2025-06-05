@@ -7,7 +7,7 @@ const BattleTest = () => {
     battleback1Name: 'Castle1',
     battleback2Name: 'Brick',
     isBoss: false,
-    musicName: 'battleTheme2',
+    musicName: 'battleTheme4',
   });
 };
 
